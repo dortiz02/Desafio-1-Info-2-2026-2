@@ -1,6 +1,7 @@
 #include "gravedad.h"
 #include "tablero.h"
 #include "fichas.h"
+#include "aleatorio.h"
 
 void aplicarGravedad(unsigned char* tablero, int filas, int columnas)
 {
@@ -16,6 +17,20 @@ void aplicarGravedad(unsigned char* tablero, int filas, int columnas)
                     colocarFicha(tablero, filaLectura, columna, columnas, VACIO);
                 }
                 filaEscritura = filaEscritura - 1;
+            }
+        }
+    }
+}
+
+void generarNuevasFichas(unsigned char* tablero, int filas, int columnas)
+{
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            unsigned char codigo = obtenerFicha(tablero, fila, columna, columnas);
+
+            if (codigo == VACIO) {
+                unsigned char nueva = generarFichaAleatoria();
+                colocarFicha(tablero, fila, columna, columnas, nueva);
             }
         }
     }
