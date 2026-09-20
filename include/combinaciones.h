@@ -11,4 +11,10 @@ int detectarHorizontales(unsigned char* tablero, int filas, int columnas);
 // iguales. Devuelve la cantidad de combinaciones verticales encontradas.
 int detectarVerticales(unsigned char* tablero, int filas, int columnas);
 
+// Recorre el tablero completo y convierte toda ficha MARCADA en VACIO.
+// Una ficha marcada por combo horizontal Y vertical a la vez solo se
+// cuenta una vez, porque el barrido revisa cada posicion una sola vez.
+// Devuelve la cantidad de fichas que fueron barridas (eliminadas).
+int barrerMarcadas(unsigned char* tablero, int filas, int columnas);
+
 #endif // COMBINACIONES_H
