@@ -1,5 +1,6 @@
 #include "tablero.h"
 #include "fichas.h"
+#include "aleatorio.h"
 
 unsigned char* crearTablero(int filas, int columnas, int &bytesReservados)
 {
@@ -28,10 +29,6 @@ unsigned char obtenerFicha(unsigned char* tablero, int fila, int columna, int co
     int byteIndice = bitInicial / 8;
     int bitOffset = bitInicial % 8;
 
-    // Se combina el byte actual con el siguiente en un valor de 16 bits,
-    // pero solo cuando la ficha realmente cruza hacia el siguiente byte
-    // (esto evita leer memoria fuera del bloque reservado cuando el
-    // byte actual es el ultimo del tablero).
     unsigned int dosBytes = tablero[byteIndice];
     if (bitOffset > 5) {
         dosBytes = dosBytes | ((unsigned int)tablero[byteIndice + 1] << 8);
@@ -61,5 +58,15 @@ void colocarFicha(unsigned char* tablero, int fila, int columna, int columnas, u
     if (bitOffset > 5) {
         tablero[byteIndice + 1] = (unsigned char)(tablero[byteIndice + 1] & ((mascaraLimpiar >> 8) & 0xFF));
         tablero[byteIndice + 1] = (unsigned char)(tablero[byteIndice + 1] | ((valorDesplazado >> 8) & 0xFF));
+    }
+}
+
+void llenarTableroAleatorio(unsigned char* tablero, int filas, int columnas)
+{
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            unsigned char ficha = generarFichaAleatoria();
+            colocarFicha(tablero, fila, columna, columnas, ficha);
+        }
     }
 }
