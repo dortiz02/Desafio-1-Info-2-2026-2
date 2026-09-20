@@ -7,11 +7,13 @@ SOURCES += \
     tablero.cpp \
     vista.cpp \
     aleatorio.cpp \
-    estado.cpp
+    estado.cpp \
+    combinaciones.cpp
 
 HEADERS += \
     tablero.h \
     fichas.h \
     vista.h \
     aleatorio.h \
-    estado.h
+    estado.h \
+    combinaciones.h
