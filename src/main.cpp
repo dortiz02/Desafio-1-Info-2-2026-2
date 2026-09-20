@@ -3,10 +3,12 @@
 #include "fichas.h"
 #include "vista.h"
 #include "aleatorio.h"
+#include "estado.h"
 
 int main()
 {
     inicializarGeneradorAleatorio();
+    inicializarEstado();
 
     int filas, columnas;
     std::cout << "Numero de filas del tablero: ";
