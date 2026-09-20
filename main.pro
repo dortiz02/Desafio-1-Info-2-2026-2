@@ -6,10 +6,12 @@ SOURCES += \
     main.cpp \
     tablero.cpp \
     vista.cpp \
-    aleatorio.cpp
+    aleatorio.cpp \
+    estado.cpp
 
 HEADERS += \
     tablero.h \
     fichas.h \
     vista.h \
-    aleatorio.h
+    aleatorio.h \
+    estado.h
