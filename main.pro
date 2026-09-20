@@ -8,7 +8,8 @@ SOURCES += \
     vista.cpp \
     aleatorio.cpp \
     estado.cpp \
-    combinaciones.cpp
+    combinaciones.cpp \
+    gravedad.cpp
 
 HEADERS += \
     tablero.h \
@@ -16,4 +17,5 @@ HEADERS += \
     vista.h \
     aleatorio.h \
     estado.h \
-    combinaciones.h
+    combinaciones.h \
+    gravedad.h
