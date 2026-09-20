@@ -81,3 +81,20 @@ int detectarVerticales(unsigned char* tablero, int filas, int columnas)
 
     return combosEncontrados;
 }
+
+int barrerMarcadas(unsigned char* tablero, int filas, int columnas)
+{
+    int fichasBarridas = 0;
+
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            unsigned char codigo = obtenerFicha(tablero, fila, columna, columnas);
+            if (codigo == MARCADA) {
+                colocarFicha(tablero, fila, columna, columnas, VACIO);
+                fichasBarridas = fichasBarridas + 1;
+            }
+        }
+    }
+
+    return fichasBarridas;
+}
