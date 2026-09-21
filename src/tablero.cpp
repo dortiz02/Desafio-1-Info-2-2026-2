@@ -2,10 +2,21 @@
 #include "fichas.h"
 #include "aleatorio.h"
 
-unsigned char* crearTablero(int filas, int columnas, int &bytesReservados)
+// Capacidad fisica actualmente reservada (en bytes). Variable de alcance
+// de archivo, siguiendo el mismo patron usado en el modulo estado: sirve
+// para no tener que pasarla como parametro en cada funcion del modulo.
+static int capacidadReservada = 0;
+
+static int calcularBytesNecesarios(int filas, int columnas)
 {
     int totalBits = filas * columnas * BITS_POR_FICHA;
-    bytesReservados = (totalBits + 7) / 8; // redondeo hacia arriba
+    return (totalBits + 7) / 8;
+}
+
+unsigned char* crearTablero(int filas, int columnas, int &bytesReservados)
+{
+    bytesReservados = calcularBytesNecesarios(filas, columnas);
+    capacidadReservada = bytesReservados;
 
     unsigned char* tablero = new unsigned char[bytesReservados];
 
@@ -74,7 +85,7 @@ void llenarTableroAleatorio(unsigned char* tablero, int filas, int columnas)
 void agregarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion)
 {
     int nuevasFilas = filas + 1;
-    int nuevosBytes = (nuevasFilas * columnas * BITS_POR_FICHA + 7) / 8;
+    int nuevosBytes = calcularBytesNecesarios(nuevasFilas, columnas);
 
     unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
     for (int i = 0; i < nuevosBytes; i++) {
@@ -99,15 +110,20 @@ void agregarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int 
     tablero = nuevoTablero;
     filas = nuevasFilas;
     bytesReservados = nuevosBytes;
+    capacidadReservada = nuevosBytes; // al agregar, siempre se crece exacto
 }
 
 void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion)
 {
     int nuevasFilas = filas - 1;
-    int nuevosBytes = (nuevasFilas * columnas * BITS_POR_FICHA + 7) / 8;
+    int bytesNecesarios = calcularBytesNecesarios(nuevasFilas, columnas);
 
-    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
-    for (int i = 0; i < nuevosBytes; i++) {
+    double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
+
+    int bytesDelBufferNuevo = (ocupacion < 0.65) ? bytesNecesarios : capacidadReservada;
+
+    unsigned char* nuevoTablero = new unsigned char[bytesDelBufferNuevo];
+    for (int i = 0; i < bytesDelBufferNuevo; i++) {
         nuevoTablero[i] = 0;
     }
 
@@ -122,14 +138,19 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
     delete[] tablero;
     tablero = nuevoTablero;
     filas = nuevasFilas;
-    bytesReservados = nuevosBytes;
+    bytesReservados = bytesNecesarios; // bytes realmente usados ahora
+
+    if (ocupacion < 0.65) {
+        capacidadReservada = bytesNecesarios;
+    }
+    // si la ocupacion no bajo del 65%, capacidadReservada se mantiene igual
 }
 
 void agregarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
 {
     int columnasViejas = columnas;
     int nuevasColumnas = columnas + 1;
-    int nuevosBytes = (filas * nuevasColumnas * BITS_POR_FICHA + 7) / 8;
+    int nuevosBytes = calcularBytesNecesarios(filas, nuevasColumnas);
 
     unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
     for (int i = 0; i < nuevosBytes; i++) {
@@ -154,16 +175,21 @@ void agregarColumna(unsigned char* &tablero, int filas, int &columnas, int &byte
     tablero = nuevoTablero;
     columnas = nuevasColumnas;
     bytesReservados = nuevosBytes;
+    capacidadReservada = nuevosBytes; // al agregar, siempre se crece exacto
 }
 
 void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
 {
     int columnasViejas = columnas;
     int nuevasColumnas = columnas - 1;
-    int nuevosBytes = (filas * nuevasColumnas * BITS_POR_FICHA + 7) / 8;
+    int bytesNecesarios = calcularBytesNecesarios(filas, nuevasColumnas);
 
-    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
-    for (int i = 0; i < nuevosBytes; i++) {
+    double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
+
+    int bytesDelBufferNuevo = (ocupacion < 0.65) ? bytesNecesarios : capacidadReservada;
+
+    unsigned char* nuevoTablero = new unsigned char[bytesDelBufferNuevo];
+    for (int i = 0; i < bytesDelBufferNuevo; i++) {
         nuevoTablero[i] = 0;
     }
 
@@ -178,5 +204,14 @@ void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &byt
     delete[] tablero;
     tablero = nuevoTablero;
     columnas = nuevasColumnas;
-    bytesReservados = nuevosBytes;
+    bytesReservados = bytesNecesarios;
+
+    if (ocupacion < 0.65) {
+        capacidadReservada = bytesNecesarios;
+    }
+}
+
+int obtenerCapacidadReservada()
+{
+    return capacidadReservada;
 }
