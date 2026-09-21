@@ -2,8 +2,8 @@
 #include "vista.h"
 #include "tablero.h"
 #include "fichas.h"
+#include "estado.h"
 
-// Traduce un codigo de 3 bits a un caracter legible en consola.
 char caracterDeFicha(unsigned char codigo)
 {
     switch (codigo) {
@@ -36,9 +36,18 @@ void mostrarTableroFichas(unsigned char* tablero, int filas, int columnas)
     std::cout << "Tablero (fichas):" << std::endl;
     for (int fila = 0; fila < filas; fila++) {
         for (int columna = 0; columna < columnas; columna++) {
-            unsigned char codigo = obtenerFicha(tablero, fila, columna, columnas);
-            std::cout << caracterDeFicha(codigo) << " ";
+            std::cout << caracterDeFicha(obtenerFicha(tablero, fila, columna, columnas)) << " ";
         }
         std::cout << std::endl;
     }
+}
+
+void mostrarEstadoJuego(int filas, int columnas)
+{
+    std::cout << "Dimensiones: " << filas << "x" << columnas << std::endl;
+    std::cout << "Eliminaciones del usuario: " << obtenerEliminacionesUsuario() << std::endl;
+    std::cout << "Fichas eliminadas en total: " << obtenerFichasEliminadasTotal() << std::endl;
+    std::cout << "Combinaciones detectadas: " << obtenerCombosDetectados() << std::endl;
+    std::cout << "Cascadas en esta jugada: " << obtenerCascadasJugadaActual() << std::endl;
+    std::cout << "Puntuacion: " << obtenerPuntuacion() << std::endl;
 }
