@@ -40,6 +40,13 @@ int main()
         std::cout << "Columna a eliminar: ";
         std::cin >> columnaSeleccionada;
 
+        unsigned char codigoActual = obtenerFicha(tablero, filaSeleccionada, columnaSeleccionada, columnas);
+
+        if (codigoActual == VACIO) {
+            std::cout << "Esa posicion ya esta vacia, elige otra." << std::endl;
+            continue;
+        }
+
         colocarFicha(tablero, filaSeleccionada, columnaSeleccionada, columnas, VACIO);
         registrarEliminacionUsuario();
 
