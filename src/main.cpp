@@ -7,6 +7,42 @@
 #include "combinaciones.h"
 #include "gravedad.h"
 
+void procesarCascadas(unsigned char* tablero, int filas, int columnas)
+{
+    reiniciarCascadasJugada();
+
+    int combosEnEstaRonda;
+    do {
+        aplicarGravedad(tablero, filas, columnas);
+        generarNuevasFichas(tablero, filas, columnas);
+
+        int combosH = detectarHorizontales(tablero, filas, columnas);
+        int combosV = detectarVerticales(tablero, filas, columnas);
+        combosEnEstaRonda = combosH + combosV;
+
+        if (combosEnEstaRonda > 0) {
+            sumarCombosDetectados(combosEnEstaRonda);
+            incrementarCascadasJugada();
+
+            int fichasBarridas = barrerMarcadas(tablero, filas, columnas);
+            sumarFichasEliminadas(fichasBarridas);
+        }
+    } while (combosEnEstaRonda > 0);
+}
+
+void mostrarResumen(unsigned char* tablero, int filas, int columnas, int bytesReservados)
+{
+    mostrarTableroBinario(tablero, bytesReservados);
+    mostrarTableroFichas(tablero, filas, columnas);
+
+    std::cout << "Dimensiones: " << filas << "x" << columnas << std::endl;
+    std::cout << "Eliminaciones del usuario: " << obtenerEliminacionesUsuario() << std::endl;
+    std::cout << "Fichas eliminadas en total: " << obtenerFichasEliminadasTotal() << std::endl;
+    std::cout << "Combinaciones detectadas: " << obtenerCombosDetectados() << std::endl;
+    std::cout << "Cascadas en esta jugada: " << obtenerCascadasJugadaActual() << std::endl;
+    std::cout << "Puntuacion: " << obtenerPuntuacion() << std::endl;
+}
+
 int main()
 {
     inicializarGeneradorAleatorio();
@@ -20,7 +56,6 @@ int main()
 
     int bytesReservados = 0;
     unsigned char* tablero = crearTablero(filas, columnas, bytesReservados);
-
     llenarTableroAleatorio(tablero, filas, columnas);
 
     mostrarTableroBinario(tablero, bytesReservados);
@@ -28,61 +63,66 @@ int main()
 
     bool jugando = true;
     while (jugando) {
-        int filaSeleccionada, columnaSeleccionada;
-        std::cout << "Fila a eliminar (-1 para salir): ";
-        std::cin >> filaSeleccionada;
+        std::cout << std::endl << "1) Eliminar ficha  2) Agregar fila  3) Eliminar fila";
+        std::cout << std::endl << "4) Agregar columna 5) Eliminar columna  6) Salir" << std::endl;
 
-        if (filaSeleccionada == -1) {
-            jugando = false;
-            continue;
-        }
+        int opcion;
+        std::cin >> opcion;
 
-        std::cout << "Columna a eliminar: ";
-        std::cin >> columnaSeleccionada;
+        if (opcion == 1) {
+            int filaSel, columnaSel;
+            std::cout << "Fila: ";
+            std::cin >> filaSel;
+            std::cout << "Columna: ";
+            std::cin >> columnaSel;
 
-        unsigned char codigoActual = obtenerFicha(tablero, filaSeleccionada, columnaSeleccionada, columnas);
-
-        if (codigoActual == VACIO) {
-            std::cout << "Esa posicion ya esta vacia, elige otra." << std::endl;
-            continue;
-        }
-
-        colocarFicha(tablero, filaSeleccionada, columnaSeleccionada, columnas, VACIO);
-        registrarEliminacionUsuario();
-
-        reiniciarCascadasJugada();
-
-        int combosEnEstaRonda;
-        do {
-            aplicarGravedad(tablero, filas, columnas);
-            generarNuevasFichas(tablero, filas, columnas);
-
-            int combosH = detectarHorizontales(tablero, filas, columnas);
-            int combosV = detectarVerticales(tablero, filas, columnas);
-            combosEnEstaRonda = combosH + combosV;
-
-            if (combosEnEstaRonda > 0) {
-                sumarCombosDetectados(combosEnEstaRonda);
-                incrementarCascadasJugada();
-
-                int fichasBarridas = barrerMarcadas(tablero, filas, columnas);
-                sumarFichasEliminadas(fichasBarridas);
+            if (obtenerFicha(tablero, filaSel, columnaSel, columnas) == VACIO) {
+                std::cout << "Esa posicion ya esta vacia." << std::endl;
+                continue;
             }
 
-        } while (combosEnEstaRonda > 0);
+            colocarFicha(tablero, filaSel, columnaSel, columnas, VACIO);
+            registrarEliminacionUsuario();
+            procesarCascadas(tablero, filas, columnas);
+            mostrarResumen(tablero, filas, columnas, bytesReservados);
 
-        mostrarTableroBinario(tablero, bytesReservados);
-        mostrarTableroFichas(tablero, filas, columnas);
+        } else if (opcion == 2) {
+            int posicion;
+            std::cout << "Posicion de la nueva fila (0.." << filas << "): ";
+            std::cin >> posicion;
+            agregarFila(tablero, filas, bytesReservados, columnas, posicion);
+            procesarCascadas(tablero, filas, columnas);
+            mostrarResumen(tablero, filas, columnas, bytesReservados);
 
-        std::cout << "Dimensiones: " << filas << "x" << columnas << std::endl;
-        std::cout << "Eliminaciones del usuario: " << obtenerEliminacionesUsuario() << std::endl;
-        std::cout << "Fichas eliminadas en total: " << obtenerFichasEliminadasTotal() << std::endl;
-        std::cout << "Combinaciones detectadas: " << obtenerCombosDetectados() << std::endl;
-        std::cout << "Cascadas en esta jugada: " << obtenerCascadasJugadaActual() << std::endl;
-        std::cout << "Puntuacion: " << obtenerPuntuacion() << std::endl;
+        } else if (opcion == 3) {
+            int posicion;
+            std::cout << "Fila a eliminar (0.." << (filas - 1) << "): ";
+            std::cin >> posicion;
+            eliminarFila(tablero, filas, bytesReservados, columnas, posicion);
+            procesarCascadas(tablero, filas, columnas);
+            mostrarResumen(tablero, filas, columnas, bytesReservados);
+
+        } else if (opcion == 4) {
+            int posicion;
+            std::cout << "Posicion de la nueva columna (0.." << columnas << "): ";
+            std::cin >> posicion;
+            agregarColumna(tablero, filas, columnas, bytesReservados, posicion);
+            procesarCascadas(tablero, filas, columnas);
+            mostrarResumen(tablero, filas, columnas, bytesReservados);
+
+        } else if (opcion == 5) {
+            int posicion;
+            std::cout << "Columna a eliminar (0.." << (columnas - 1) << "): ";
+            std::cin >> posicion;
+            eliminarColumna(tablero, filas, columnas, bytesReservados, posicion);
+            procesarCascadas(tablero, filas, columnas);
+            mostrarResumen(tablero, filas, columnas, bytesReservados);
+
+        } else if (opcion == 6) {
+            jugando = false;
+        }
     }
 
     liberarTablero(tablero);
-
     return 0;
 }
