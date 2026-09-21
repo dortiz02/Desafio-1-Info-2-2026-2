@@ -124,3 +124,59 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
     filas = nuevasFilas;
     bytesReservados = nuevosBytes;
 }
+
+void agregarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
+{
+    int columnasViejas = columnas;
+    int nuevasColumnas = columnas + 1;
+    int nuevosBytes = (filas * nuevasColumnas * BITS_POR_FICHA + 7) / 8;
+
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
+    for (int i = 0; i < nuevosBytes; i++) {
+        nuevoTablero[i] = 0;
+    }
+
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
+            if (columnaNueva < posicion) {
+                unsigned char valor = obtenerFicha(tablero, fila, columnaNueva, columnasViejas);
+                colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, valor);
+            } else if (columnaNueva == posicion) {
+                colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, VACIO);
+            } else {
+                unsigned char valor = obtenerFicha(tablero, fila, columnaNueva - 1, columnasViejas);
+                colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, valor);
+            }
+        }
+    }
+
+    delete[] tablero;
+    tablero = nuevoTablero;
+    columnas = nuevasColumnas;
+    bytesReservados = nuevosBytes;
+}
+
+void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
+{
+    int columnasViejas = columnas;
+    int nuevasColumnas = columnas - 1;
+    int nuevosBytes = (filas * nuevasColumnas * BITS_POR_FICHA + 7) / 8;
+
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
+    for (int i = 0; i < nuevosBytes; i++) {
+        nuevoTablero[i] = 0;
+    }
+
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
+            int columnaOrigen = (columnaNueva < posicion) ? columnaNueva : columnaNueva + 1;
+            unsigned char valor = obtenerFicha(tablero, fila, columnaOrigen, columnasViejas);
+            colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, valor);
+        }
+    }
+
+    delete[] tablero;
+    tablero = nuevoTablero;
+    columnas = nuevasColumnas;
+    bytesReservados = nuevosBytes;
+}
