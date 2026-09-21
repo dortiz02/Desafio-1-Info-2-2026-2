@@ -17,4 +17,13 @@ void colocarFicha(unsigned char* tablero, int fila, int columna, int columnas, u
 // Llena todas las posiciones del tablero con fichas aleatorias.
 void llenarTableroAleatorio(unsigned char* tablero, int filas, int columnas);
 
+// Inserta una fila vacia (todo VACIO) en la posicion indicada (0..filas).
+// Reasigna la memoria al tamaño minimo necesario para las nuevas dimensiones.
+void agregarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion);
+
+// Elimina la fila en la posicion indicada (0..filas-1).
+// Por ahora siempre reasigna la memoria al tamaño minimo exacto; la
+// politica de conservar el bloque viejo se agrega mas adelante.
+void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion);
+
 #endif // TABLERO_H
