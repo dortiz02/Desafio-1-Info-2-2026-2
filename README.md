@@ -4,7 +4,7 @@
 
 Implementación de un juego tipo *Candy Crush* en C++ utilizando representación
 compacta de fichas a nivel de bits (3 bits por posición) y gestión manual de
-memoria dinámica, sin uso de clases, STL ni objetos tipo string.
+memoria dinámica.
 
 
 ## Autor
