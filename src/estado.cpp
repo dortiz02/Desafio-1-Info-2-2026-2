@@ -1,8 +1,5 @@
 #include "estado.h"
 
-// Variables de alcance de archivo: solo son visibles y modificables desde
-// las funciones de este modulo, imitando el encapsulamiento que normalmente
-// daria una clase.
 static int eliminacionesUsuario = 0;
 static int fichasEliminadasTotal = 0;
 static int combosDetectados = 0;
@@ -18,57 +15,20 @@ void inicializarEstado()
     puntuacion = 0;
 }
 
-void registrarEliminacionUsuario()
-{
-    eliminacionesUsuario = eliminacionesUsuario + 1;
-}
+void registrarEliminacionUsuario() { eliminacionesUsuario = eliminacionesUsuario + 1; }
+void sumarFichasEliminadas(int cantidad) { fichasEliminadasTotal = fichasEliminadasTotal + cantidad; }
+void sumarCombosDetectados(int cantidad) { combosDetectados = combosDetectados + cantidad; }
+void reiniciarCascadasJugada() { cascadasJugadaActual = 0; }
+void incrementarCascadasJugada() { cascadasJugadaActual = cascadasJugadaActual + 1; }
 
-void sumarFichasEliminadas(int cantidad)
+void registrarPuntosPorBarrida(int fichasBarridas, int numeroCascada)
 {
-    fichasEliminadasTotal = fichasEliminadasTotal + cantidad;
-}
-
-void sumarCombosDetectados(int cantidad)
-{
-    combosDetectados = combosDetectados + cantidad;
-}
-
-void reiniciarCascadasJugada()
-{
-    cascadasJugadaActual = 0;
-}
-
-void incrementarCascadasJugada()
-{
-    cascadasJugadaActual = cascadasJugadaActual + 1;
-}
-
-void sumarPuntuacion(int puntos)
-{
+    int puntos = (fichasBarridas * 10) + (numeroCascada * 5);
     puntuacion = puntuacion + puntos;
 }
 
-int obtenerEliminacionesUsuario()
-{
-    return eliminacionesUsuario;
-}
-
-int obtenerFichasEliminadasTotal()
-{
-    return fichasEliminadasTotal;
-}
-
-int obtenerCombosDetectados()
-{
-    return combosDetectados;
-}
-
-int obtenerCascadasJugadaActual()
-{
-    return cascadasJugadaActual;
-}
-
-int obtenerPuntuacion()
-{
-    return puntuacion;
-}
+int obtenerEliminacionesUsuario() { return eliminacionesUsuario; }
+int obtenerFichasEliminadasTotal() { return fichasEliminadasTotal; }
+int obtenerCombosDetectados() { return combosDetectados; }
+int obtenerCascadasJugadaActual() { return cascadasJugadaActual; }
+int obtenerPuntuacion() { return puntuacion; }
