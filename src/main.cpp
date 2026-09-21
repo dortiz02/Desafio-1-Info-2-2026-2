@@ -26,6 +26,7 @@ void procesarCascadas(unsigned char* tablero, int filas, int columnas)
 
             int fichasBarridas = barrerMarcadas(tablero, filas, columnas);
             sumarFichasEliminadas(fichasBarridas);
+            registrarPuntosPorBarrida(fichasBarridas, obtenerCascadasJugadaActual());
         }
     } while (combosEnEstaRonda > 0);
 }
