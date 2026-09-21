@@ -3,8 +3,9 @@
 #include "aleatorio.h"
 
 // Capacidad fisica actualmente reservada (en bytes). Variable de alcance
-// de archivo, siguiendo el mismo patron usado en el modulo estado: sirve
-// para no tener que pasarla como parametro en cada funcion del modulo.
+// de archivo: sirve para no tener que pasarla como parametro en cada
+// funcion del modulo, y para poder diferir de los bytes realmente
+// necesarios cuando la politica del 65% conserva el bloque viejo.
 static int capacidadReservada = 0;
 
 static int calcularBytesNecesarios(int filas, int columnas)
@@ -18,9 +19,12 @@ unsigned char* crearTablero(int filas, int columnas, int &bytesReservados)
     bytesReservados = calcularBytesNecesarios(filas, columnas);
     capacidadReservada = bytesReservados;
 
-    unsigned char* tablero = new unsigned char[bytesReservados];
+    // VALIDACION: Se reserva 1 byte adicional (+1) como byte de guardia 
+    // para evitar el desbordamiento al escribir una ficha que cruza hacia byteIndice + 1
+    // en los ultimos bits del tablero.
+    unsigned char* tablero = new unsigned char[bytesReservados + 1];
 
-    for (int i = 0; i < bytesReservados; i++) {
+    for (int i = 0; i <= bytesReservados; i++) {
         tablero[i] = 0;
     }
 
@@ -40,6 +44,8 @@ unsigned char obtenerFicha(unsigned char* tablero, int fila, int columna, int co
     int byteIndice = bitInicial / 8;
     int bitOffset = bitInicial % 8;
 
+    // Se combina el byte actual con el siguiente en un valor de 16 bits,
+    // pero solo cuando la ficha realmente cruza hacia el siguiente byte.
     unsigned int dosBytes = tablero[byteIndice];
     if (bitOffset > 5) {
         dosBytes = dosBytes | ((unsigned int)tablero[byteIndice + 1] << 8);
@@ -87,8 +93,9 @@ void agregarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int 
     int nuevasFilas = filas + 1;
     int nuevosBytes = calcularBytesNecesarios(nuevasFilas, columnas);
 
-    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
-    for (int i = 0; i < nuevosBytes; i++) {
+    // VALIDACION: Byte de guardia en la nueva asignacion
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes + 1];
+    for (int i = 0; i <= nuevosBytes; i++) {
         nuevoTablero[i] = 0;
     }
 
@@ -120,8 +127,12 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
     double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
 
     if (ocupacion < 0.65) {
-        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios];
-        for (int i = 0; i < bytesNecesarios; i++) nuevoTablero[i] = 0;
+        // La ocupacion cayo lo suficiente: se reasigna al tamano minimo exacto.
+        // VALIDACION: Se anade + 1 para el byte de guardia.
+        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios + 1];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            nuevoTablero[i] = 0;
+        }
 
         for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
             for (int columna = 0; columna < columnas; columna++) {
@@ -135,8 +146,12 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
         tablero = nuevoTablero;
         capacidadReservada = bytesNecesarios;
     } else {
-        unsigned char* temporal = new unsigned char[bytesNecesarios];
-        for (int i = 0; i < bytesNecesarios; i++) temporal[i] = 0;
+        // No toca reducir memoria: se reacomoda dentro del bloque actual,
+        // usando un arreglo temporal pequeno (del tamano minimo) como apoyo
+        unsigned char* temporal = new unsigned char[bytesNecesarios + 1];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            temporal[i] = 0;
+        }
 
         for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
             for (int columna = 0; columna < columnas; columna++) {
@@ -146,21 +161,25 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
             }
         }
 
-        for (int i = 0; i < bytesNecesarios; i++) tablero[i] = temporal[i];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            tablero[i] = temporal[i];
+        }
         delete[] temporal;
     }
 
     filas = nuevasFilas;
     bytesReservados = bytesNecesarios;
 }
+
 void agregarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
 {
     int columnasViejas = columnas;
     int nuevasColumnas = columnas + 1;
     int nuevosBytes = calcularBytesNecesarios(filas, nuevasColumnas);
 
-    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
-    for (int i = 0; i < nuevosBytes; i++) {
+    // VALIDACION: Byte de guardia
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes + 1];
+    for (int i = 0; i <= nuevosBytes; i++) {
         nuevoTablero[i] = 0;
     }
 
@@ -193,8 +212,11 @@ void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &byt
     double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
 
     if (ocupacion < 0.65) {
-        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios];
-        for (int i = 0; i < bytesNecesarios; i++) nuevoTablero[i] = 0;
+        // VALIDACION: Byte de guardia
+        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios + 1];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            nuevoTablero[i] = 0;
+        }
 
         for (int fila = 0; fila < filas; fila++) {
             for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
@@ -208,8 +230,11 @@ void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &byt
         tablero = nuevoTablero;
         capacidadReservada = bytesNecesarios;
     } else {
-        unsigned char* temporal = new unsigned char[bytesNecesarios];
-        for (int i = 0; i < bytesNecesarios; i++) temporal[i] = 0;
+        // VALIDACION: Byte de guardia
+        unsigned char* temporal = new unsigned char[bytesNecesarios + 1];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            temporal[i] = 0;
+        }
 
         for (int fila = 0; fila < filas; fila++) {
             for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
@@ -219,7 +244,9 @@ void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &byt
             }
         }
 
-        for (int i = 0; i < bytesNecesarios; i++) tablero[i] = temporal[i];
+        for (int i = 0; i <= bytesNecesarios; i++) {
+            tablero[i] = temporal[i];
+        }
         delete[] temporal;
     }
 
