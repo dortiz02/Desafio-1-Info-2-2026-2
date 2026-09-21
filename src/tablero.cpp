@@ -70,3 +70,57 @@ void llenarTableroAleatorio(unsigned char* tablero, int filas, int columnas)
         }
     }
 }
+
+void agregarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion)
+{
+    int nuevasFilas = filas + 1;
+    int nuevosBytes = (nuevasFilas * columnas * BITS_POR_FICHA + 7) / 8;
+
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
+    for (int i = 0; i < nuevosBytes; i++) {
+        nuevoTablero[i] = 0;
+    }
+
+    for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            if (filaNueva < posicion) {
+                unsigned char valor = obtenerFicha(tablero, filaNueva, columna, columnas);
+                colocarFicha(nuevoTablero, filaNueva, columna, columnas, valor);
+            } else if (filaNueva == posicion) {
+                colocarFicha(nuevoTablero, filaNueva, columna, columnas, VACIO);
+            } else {
+                unsigned char valor = obtenerFicha(tablero, filaNueva - 1, columna, columnas);
+                colocarFicha(nuevoTablero, filaNueva, columna, columnas, valor);
+            }
+        }
+    }
+
+    delete[] tablero;
+    tablero = nuevoTablero;
+    filas = nuevasFilas;
+    bytesReservados = nuevosBytes;
+}
+
+void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int columnas, int posicion)
+{
+    int nuevasFilas = filas - 1;
+    int nuevosBytes = (nuevasFilas * columnas * BITS_POR_FICHA + 7) / 8;
+
+    unsigned char* nuevoTablero = new unsigned char[nuevosBytes];
+    for (int i = 0; i < nuevosBytes; i++) {
+        nuevoTablero[i] = 0;
+    }
+
+    for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            int filaOrigen = (filaNueva < posicion) ? filaNueva : filaNueva + 1;
+            unsigned char valor = obtenerFicha(tablero, filaOrigen, columna, columnas);
+            colocarFicha(nuevoTablero, filaNueva, columna, columnas, valor);
+        }
+    }
+
+    delete[] tablero;
+    tablero = nuevoTablero;
+    filas = nuevasFilas;
+    bytesReservados = nuevosBytes;
+}
