@@ -31,5 +31,3 @@ Cada acción imprime el tablero en binario, el tablero con fichas y las estadís
 - `gravedad.h/.cpp`: caída y relleno de fichas.
 - `aleatorio.h/.cpp`: fichas aleatorias con distribución uniforme.
 - `estado.h/.cpp`: estadísticas y puntuación.
-- `docs/informe.md`: informe del desarrollo.
-- `docs/justificacion_tipos.md`: justificación de tipos y estructuras de control.
