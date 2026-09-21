@@ -117,35 +117,42 @@ void eliminarFila(unsigned char* &tablero, int &filas, int &bytesReservados, int
 {
     int nuevasFilas = filas - 1;
     int bytesNecesarios = calcularBytesNecesarios(nuevasFilas, columnas);
-
     double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
 
-    int bytesDelBufferNuevo = (ocupacion < 0.65) ? bytesNecesarios : capacidadReservada;
-
-    unsigned char* nuevoTablero = new unsigned char[bytesDelBufferNuevo];
-    for (int i = 0; i < bytesDelBufferNuevo; i++) {
-        nuevoTablero[i] = 0;
-    }
-
-    for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
-        for (int columna = 0; columna < columnas; columna++) {
-            int filaOrigen = (filaNueva < posicion) ? filaNueva : filaNueva + 1;
-            unsigned char valor = obtenerFicha(tablero, filaOrigen, columna, columnas);
-            colocarFicha(nuevoTablero, filaNueva, columna, columnas, valor);
-        }
-    }
-
-    delete[] tablero;
-    tablero = nuevoTablero;
-    filas = nuevasFilas;
-    bytesReservados = bytesNecesarios; // bytes realmente usados ahora
-
     if (ocupacion < 0.65) {
-        capacidadReservada = bytesNecesarios;
-    }
-    // si la ocupacion no bajo del 65%, capacidadReservada se mantiene igual
-}
+        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios];
+        for (int i = 0; i < bytesNecesarios; i++) nuevoTablero[i] = 0;
 
+        for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
+            for (int columna = 0; columna < columnas; columna++) {
+                int filaOrigen = (filaNueva < posicion) ? filaNueva : filaNueva + 1;
+                unsigned char valor = obtenerFicha(tablero, filaOrigen, columna, columnas);
+                colocarFicha(nuevoTablero, filaNueva, columna, columnas, valor);
+            }
+        }
+
+        delete[] tablero;
+        tablero = nuevoTablero;
+        capacidadReservada = bytesNecesarios;
+    } else {
+        unsigned char* temporal = new unsigned char[bytesNecesarios];
+        for (int i = 0; i < bytesNecesarios; i++) temporal[i] = 0;
+
+        for (int filaNueva = 0; filaNueva < nuevasFilas; filaNueva++) {
+            for (int columna = 0; columna < columnas; columna++) {
+                int filaOrigen = (filaNueva < posicion) ? filaNueva : filaNueva + 1;
+                unsigned char valor = obtenerFicha(tablero, filaOrigen, columna, columnas);
+                colocarFicha(temporal, filaNueva, columna, columnas, valor);
+            }
+        }
+
+        for (int i = 0; i < bytesNecesarios; i++) tablero[i] = temporal[i];
+        delete[] temporal;
+    }
+
+    filas = nuevasFilas;
+    bytesReservados = bytesNecesarios;
+}
 void agregarColumna(unsigned char* &tablero, int filas, int &columnas, int &bytesReservados, int posicion)
 {
     int columnasViejas = columnas;
@@ -183,32 +190,41 @@ void eliminarColumna(unsigned char* &tablero, int filas, int &columnas, int &byt
     int columnasViejas = columnas;
     int nuevasColumnas = columnas - 1;
     int bytesNecesarios = calcularBytesNecesarios(filas, nuevasColumnas);
-
     double ocupacion = (double)bytesNecesarios / (double)capacidadReservada;
 
-    int bytesDelBufferNuevo = (ocupacion < 0.65) ? bytesNecesarios : capacidadReservada;
+    if (ocupacion < 0.65) {
+        unsigned char* nuevoTablero = new unsigned char[bytesNecesarios];
+        for (int i = 0; i < bytesNecesarios; i++) nuevoTablero[i] = 0;
 
-    unsigned char* nuevoTablero = new unsigned char[bytesDelBufferNuevo];
-    for (int i = 0; i < bytesDelBufferNuevo; i++) {
-        nuevoTablero[i] = 0;
-    }
-
-    for (int fila = 0; fila < filas; fila++) {
-        for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
-            int columnaOrigen = (columnaNueva < posicion) ? columnaNueva : columnaNueva + 1;
-            unsigned char valor = obtenerFicha(tablero, fila, columnaOrigen, columnasViejas);
-            colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, valor);
+        for (int fila = 0; fila < filas; fila++) {
+            for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
+                int columnaOrigen = (columnaNueva < posicion) ? columnaNueva : columnaNueva + 1;
+                unsigned char valor = obtenerFicha(tablero, fila, columnaOrigen, columnasViejas);
+                colocarFicha(nuevoTablero, fila, columnaNueva, nuevasColumnas, valor);
+            }
         }
+
+        delete[] tablero;
+        tablero = nuevoTablero;
+        capacidadReservada = bytesNecesarios;
+    } else {
+        unsigned char* temporal = new unsigned char[bytesNecesarios];
+        for (int i = 0; i < bytesNecesarios; i++) temporal[i] = 0;
+
+        for (int fila = 0; fila < filas; fila++) {
+            for (int columnaNueva = 0; columnaNueva < nuevasColumnas; columnaNueva++) {
+                int columnaOrigen = (columnaNueva < posicion) ? columnaNueva : columnaNueva + 1;
+                unsigned char valor = obtenerFicha(tablero, fila, columnaOrigen, columnasViejas);
+                colocarFicha(temporal, fila, columnaNueva, nuevasColumnas, valor);
+            }
+        }
+
+        for (int i = 0; i < bytesNecesarios; i++) tablero[i] = temporal[i];
+        delete[] temporal;
     }
 
-    delete[] tablero;
-    tablero = nuevoTablero;
     columnas = nuevasColumnas;
     bytesReservados = bytesNecesarios;
-
-    if (ocupacion < 0.65) {
-        capacidadReservada = bytesNecesarios;
-    }
 }
 
 int obtenerCapacidadReservada()
