@@ -35,15 +35,8 @@ void mostrarResumen(unsigned char* tablero, int filas, int columnas, int bytesRe
 {
     mostrarTableroBinario(tablero, bytesReservados);
     mostrarTableroFichas(tablero, filas, columnas);
-
-    std::cout << "Dimensiones: " << filas << "x" << columnas << std::endl;
-    std::cout << "Eliminaciones del usuario: " << obtenerEliminacionesUsuario() << std::endl;
-    std::cout << "Fichas eliminadas en total: " << obtenerFichasEliminadasTotal() << std::endl;
-    std::cout << "Combinaciones detectadas: " << obtenerCombosDetectados() << std::endl;
-    std::cout << "Cascadas en esta jugada: " << obtenerCascadasJugadaActual() << std::endl;
-    std::cout << "Puntuacion: " << obtenerPuntuacion() << std::endl;
+    mostrarEstadoJuego(filas, columnas);
 }
-
 int main()
 {
     inicializarGeneradorAleatorio();
